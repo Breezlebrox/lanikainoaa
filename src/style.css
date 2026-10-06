@@ -1,15 +1,15 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #193b40;
-  background: #f7f7f2;
+  color: #163958;
+  background: #fffdf7;
   font-synthesis: none;
-  --paper: #f7f7f2;
-  --ink: #193b40;
-  --teal: #23766e;
-  --muted: #617576;
-  --line: #dbe2da;
-  --soft: #eaf0e5;
-  --warn: #93631b;
+  --paper: #fffdf7;
+  --ink: #163958;
+  --ocean: #0879bd;
+  --muted: #586f86;
+  --line: #d8e5ee;
+  --soft: #eaf5fc;
+  --warn: #986019;
   color-scheme: light;
 }
 * {
@@ -17,6 +17,7 @@
 }
 body {
   margin: 0;
+  border-top: 4px solid var(--ocean);
 }
 button,
 input,
@@ -42,13 +43,13 @@ button:disabled {
   opacity: 0.5;
 }
 a {
-  color: var(--teal);
+  color: var(--ocean);
 }
 button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 3px solid #87ac44;
+  outline: 3px solid #ed9a66;
   outline-offset: 3px;
 }
 .quiet {
@@ -81,11 +82,13 @@ header {
   gap: 9px;
 }
 .brand-icon {
+  color: var(--ocean);
   font-size: 37px;
   font-weight: 400;
   line-height: 1;
 }
 .location-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -111,7 +114,7 @@ h1 {
   font-size: 15px;
 }
 .refresh {
-  background: transparent;
+  background: var(--soft);
   color: var(--ink);
   font-size: 28px;
   width: 48px;
@@ -126,6 +129,7 @@ h1 {
   padding: 30px 0 0;
 }
 .temperature {
+  color: var(--ocean);
   font-size: 88px;
   font-weight: 350;
   letter-spacing: -5px;
@@ -152,7 +156,7 @@ h1 {
 }
 .weather-symbol {
   font-size: 58px;
-  color: #ad792d;
+  color: #cf7843;
   line-height: 1;
 }
 .muted,
@@ -172,8 +176,10 @@ h1 {
 .ocean-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  padding: 26px 0 19px;
-  border-top: 1px solid var(--line);
+  padding: 23px 18px;
+  background: var(--soft);
+  border-radius: 10px;
+  border-top: 2px solid var(--ocean);
   gap: 12px;
 }
 .ocean-grid > div + div {
@@ -187,6 +193,7 @@ h1 {
   margin-bottom: 8px;
 }
 .metric {
+  color: var(--ocean);
   font-size: 38px;
   letter-spacing: -1.5px;
   margin: 0 0 8px;
@@ -245,7 +252,7 @@ h2 {
 }
 .pill {
   background: var(--soft);
-  color: var(--teal);
+  color: var(--ocean);
   border-radius: 4px;
   padding: 6px 9px;
   font-size: 10px;
@@ -289,7 +296,7 @@ h2 {
   min-height: 51px;
 }
 .rain {
-  color: var(--teal);
+  color: var(--ocean);
 }
 .day-row {
   display: grid;
@@ -321,7 +328,7 @@ h2 {
   font-size: 12px;
 }
 .high {
-  color: var(--teal);
+  color: var(--ocean);
 }
 .sun {
   display: flex;
@@ -440,6 +447,7 @@ footer > span {
     font-size: 41px;
   }
   .location-row {
+  position: relative;
     padding-top: 28px;
   }
   .temperature {
@@ -455,8 +463,8 @@ footer > span {
     font-size: 32px;
   }
   .ocean-grid .eyebrow {
-    font-size: 9px;
-    letter-spacing: 0.6px;
+    font-size: 10px;
+    letter-spacing: 0.3px;
   }
   .day-row {
     grid-template-columns: 76px 1fr;
@@ -472,28 +480,45 @@ footer > span {
   }
 }
 :root[data-theme="dark"] {
-  --paper: #122327;
-  --ink: #e5eee8;
-  --teal: #97d6bc;
-  --muted: #9eafae;
-  --line: #30464a;
-  --soft: #1c3436;
-  --warn: #e2b970;
+  --paper: #0b1d32;
+  --ink: #edf6ff;
+  --ocean: #6bc3ff;
+  --muted: #a4b9cf;
+  --line: #263e58;
+  --soft: #112c46;
+  --warn: #f2b77e;
   color: var(--ink);
   background: var(--paper);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #122327;
-    --ink: #e5eee8;
-    --teal: #97d6bc;
-    --muted: #9eafae;
-    --line: #30464a;
-    --soft: #1c3436;
-    --warn: #e2b970;
+    --paper: #0b1d32;
+    --ink: #edf6ff;
+    --ocean: #6bc3ff;
+    --muted: #a4b9cf;
+    --line: #263e58;
+    --soft: #112c46;
+    --warn: #f2b77e;
     color: var(--ink);
     background: var(--paper);
     color-scheme: dark;
   }
+}
+
+/* A quiet shoreline detail beneath the location. */
+.location-row::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 88px;
+  height: 8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 88 8'%3E%3Cpath d='M0 4 Q5 0 11 4 T22 4 T33 4 T44 4 T55 4 T66 4 T77 4 T88 4' fill='none' stroke='%230879bd' stroke-width='1.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.location-row .eyebrow { color: var(--ocean); }
+.sun { border-top: 2px solid #edbb89; }
+@media (max-width: 480px) {
+  .ocean-grid { padding: 20px 12px; gap: 8px; }
+  .ocean-grid > div + div { padding-left: 9px; }
 }

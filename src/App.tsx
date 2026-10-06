@@ -234,7 +234,7 @@ export default function App() {
       </header>
       <div className="location-row">
         <div>
-          <p className="eyebrow">YOUR COAST, AT A GLANCE</p>
+          <p className="eyebrow">ALOHA, COASTSIDE</p>
           <h1>{location.label}</h1>
           <p className="date">
             {new Intl.DateTimeFormat("en-US", {

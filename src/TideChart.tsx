@@ -42,8 +42,8 @@ export function TideChart({
         >
           <defs>
             <linearGradient id="tideFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--teal)" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="var(--teal)" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--ocean)" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="var(--ocean)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <XAxis
@@ -76,7 +76,7 @@ export function TideChart({
           <Area
             dataKey="height"
             type="monotone"
-            stroke="var(--teal)"
+            stroke="var(--ocean)"
             strokeWidth={2.5}
             fill="url(#tideFill)"
             isAnimationActive={false}
@@ -100,7 +100,7 @@ export function TideChart({
                 x={e.time}
                 y={e.height}
                 r={3}
-                fill="var(--teal)"
+                fill="var(--ocean)"
                 stroke="var(--paper)"
                 label={{
                   value: `${e.kind === "High" ? "H" : "L"} ${e.height.toFixed(1)}′`,
