@@ -2,6 +2,6 @@ name = "coastline-ndbc"
 main = "worker.js"
 compatibility_date = "2026-10-01"
 [vars]
-ALLOWED_ORIGINS = "https://breezlebrox.github.io,http://localhost:5173"
+ALLOWED_ORIGINS = "https://breezlebrox.github.io,http://localhost:5173,http://localhost:4173"
 [observability]
 enabled = false

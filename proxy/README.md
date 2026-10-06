@@ -8,3 +8,5 @@ NDBC's active-stations XML and realtime text responses lack `Access-Control-Allo
 4. Rerun the Pages workflow. For local development set the same variable in `.env.local`, then restart Vite.
 
 `ALLOWED_ORIGINS` is a comma-separated origin allowlist. Update it for a custom domain. Paths other than `/activestations.xml` and `/data/realtime2/<5-character station>.txt` are rejected; arbitrary URL forwarding is impossible. CORS is not authentication; public data remains public. No Worker credentials belong in the browser or repository. Buoy/water values remain explicitly unavailable until this is deployed.
+
+Current deployment: https://coastline-ndbc.mattcarlsonno.workers.dev. The GitHub Pages workflow uses this public URL by default.

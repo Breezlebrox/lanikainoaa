@@ -4,7 +4,7 @@ import { feet, fahrenheit, knots, numeric } from "../utils";
 const proxy = import.meta.env.VITE_NDBC_PROXY_URL?.replace(/\/$/, "");
 async function text(path: string) {
   if (!proxy)
-    throw new Error("Buoy connection is not configured. See source setup.");
+    throw new Error("Ocean observations are not connected yet. Weather and tides are still available.");
   const r = await fetch(`${proxy}/${path}`, {
     signal: AbortSignal.timeout(18000),
   });

@@ -24,7 +24,7 @@ Remote: `git@github.com:Breezlebrox/lanikainoaa.git`.
 
 `actions/configure-pages` supplies the base path. Vite assets, manifest start URL/scope, icons, and service-worker scope use that same path; user/org root sites and custom domains use `/`. There is no client-side route requiring a Pages 404 workaround. A local subpath build can be checked with `VITE_BASE_PATH=/lanikainoaa/ npm run build`.
 
-For live buoy data, deploy the optional [stateless NDBC adapter](proxy/README.md) and set the public Actions variable `VITE_NDBC_PROXY_URL`. It contains no credential. Without it the rest of the app works and buoy data is marked unavailable.
+Live buoy data uses the deployed [stateless NDBC adapter](proxy/README.md) at https://coastline-ndbc.mattcarlsonno.workers.dev. The Pages workflow includes this public endpoint; the Actions variable `VITE_NDBC_PROXY_URL` can override it. It contains no credential. For local development, set the same URL in `.env.local`.
 
 ## Privacy and multiple users
 
@@ -50,6 +50,6 @@ Open once online, allow data to load, then in iPhone Safari use **Share → Add 
 
 Unit tests use small fixtures from real NOAA/NWS response structures. Coverage includes normalization, missing sensors, malformed buoy rows, station distance ordering, tide event extraction/direction, units, Hawaii and DST timezone display, and per-key stale cache behavior. Live October 6, 2026 checks confirmed CO-OPS metadata/predictions and NWS point/hourly endpoints return data with browser CORS; NDBC metadata/text return data without browser CORS. The local browser successfully displayed real Lanikai weather and Moku o Loe predictions. No sample production values are used.
 
-A physical iPhone installation and deployed proxy require end-to-end verification after hosting setup. Location permission and NOAA outages can produce partial data; the remaining sections stay usable. This utility is not a navigation or safety forecast.
+The deployed proxy was verified against live NDBC station XML and Mokapu Point observations on October 6, 2026. A physical iPhone installation still requires device verification. Location permission and NOAA outages can produce partial data; the remaining sections stay usable. This utility is not a navigation or safety forecast.
 
 Official references: [CO-OPS](https://api.tidesandcurrents.noaa.gov/api/prod/), [metadata](https://api.tidesandcurrents.noaa.gov/mdapi/prod/), [NWS](https://www.weather.gov/documentation/services-web-api), [NDBC](https://www.ndbc.noaa.gov/faq/rt_data_access.shtml).
