@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type {
   CoastalLocation,
   Cached,
@@ -22,6 +22,7 @@ import {
   direction,
   calendarDays,
 } from "./utils";
+import { foregroundRefresh } from "./services/foregroundRefresh";
 import { TideChart } from "./TideChart";
 const initial: CoastalLocation = {
   id: "lanikai",
@@ -59,8 +60,8 @@ export default function App() {
     [name, setName] = useState(""),
     [notice, setNotice] = useState("");
   const [theme, setTheme] = useState(() => read<string>("theme") || "system");
-  const [refresh, setRefresh] = useState(0),
-    [now, setNow] = useState(Date.now()),
+  const refreshNow = useRef<() => void>(() => {});
+  const [now, setNow] = useState(Date.now()),
     [online, setOnline] = useState(navigator.onLine);
   const [tide, setTide] = useState<Load<TideData>>(empty),
     [wx, setWx] = useState<Load<WeatherData>>(empty),
@@ -74,17 +75,6 @@ export default function App() {
     write("theme", theme);
   }, [theme]);
   useEffect(() => {
-    const tick = setInterval(() => setNow(Date.now()), 60000);
-    const on = () => setOnline(navigator.onLine);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", on);
-    return () => {
-      clearInterval(tick);
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", on);
-    };
-  }, []);
-  useEffect(() => {
     let alive = true;
     setTide(empty);
     setWx(empty);
@@ -92,67 +82,87 @@ export default function App() {
     setAlertState(empty);
     setTideOptions([]);
     setBuoyOptions([]);
-    const force = refresh > 0;
-    const run = async <T,>(
-      loader: () => Promise<Cached<T>>,
-      set: (v: Load<T>) => void,
-    ) => {
-      try {
-        const value = await loader();
-        if (alive) set({ value, loading: false });
-      } catch (e) {
-        if (alive)
-          set({
-            error: e instanceof Error ? e.message : "Service unavailable",
-            loading: false,
-          });
-      }
-    };
-    void run(() => weather(location.lat, location.lon, force), setWx);
-    void run(() => alerts(location.lat, location.lon, force), setAlertState);
-    void run(async () => {
-      const all = await tideStations();
-      const options = nearby(all.data, location);
-      if (alive) setTideOptions(options);
-      const closest = options[0];
-      const preferred = options.find((s) => s.id === location.tideId);
-      const related = options.find((s) => s.id === closest?.referenceId);
-      const station =
-        preferred || related || options.find((s) => s.type === "R") || closest;
-      if (!station) throw new Error("No tide station within 250 km.");
-      return tides(station, force);
-    }, setTide);
-    void run(async () => {
-      const all = await buoyStations();
-      const options = nearby(all.data, location, 400);
-      if (alive) setBuoyOptions(options);
-      if (location.buoyId) {
-        const station = options.find((s) => s.id === location.buoyId);
-        if (!station)
-          throw new Error(
-            "Saved buoy is not currently active nearby. Choose another source.",
-          );
-        return marine(station, force);
-      }
-      let fallback: Cached<MarineObservation> | undefined;
-      for (const station of options.slice(0, 8)) {
+    const load = async (force: boolean) => {
+      const tasks: Promise<void>[] = [];
+      const run = async <T,>(
+        loader: () => Promise<Cached<T>>,
+        set: React.Dispatch<React.SetStateAction<Load<T>>>,
+      ) => {
         try {
-          const result = await marine(station, force);
-          if (result.data.waveFeet !== null) {
-            fallback ||= result;
-            if (Date.now() - result.data.time < 6 * 3600000) return result;
-          }
-        } catch {
-          /* try next actual reporting station */
+          const value = await loader();
+          if (alive) set({ value, loading: false });
+        } catch (e) {
+          if (alive)
+            set((previous) => ({
+              ...previous,
+              error: e instanceof Error ? e.message : "Service unavailable",
+              loading: false,
+            }));
         }
-      }
-      if (fallback) return { ...fallback, stale: true };
-      throw new Error(
-        "No recent wave-reporting buoy found among the eight nearest stations within 400 km. Choose a buoy below.",
+      };
+      tasks.push(run(() => weather(location.lat, location.lon, force), setWx));
+      tasks.push(
+        run(() => alerts(location.lat, location.lon, force), setAlertState),
       );
-    }, setOcean);
+      tasks.push(
+        run(async () => {
+          const all = await tideStations();
+          const options = nearby(all.data, location);
+          if (alive) setTideOptions(options);
+          const closest = options[0];
+          const preferred = options.find((s) => s.id === location.tideId);
+          const related = options.find((s) => s.id === closest?.referenceId);
+          const station =
+            preferred ||
+            related ||
+            options.find((s) => s.type === "R") ||
+            closest;
+          if (!station) throw new Error("No tide station within 250 km.");
+          return tides(station, force);
+        }, setTide),
+      );
+      tasks.push(
+        run(async () => {
+          const all = await buoyStations();
+          const options = nearby(all.data, location, 400);
+          if (alive) setBuoyOptions(options);
+          if (location.buoyId) {
+            const station = options.find((s) => s.id === location.buoyId);
+            if (!station)
+              throw new Error(
+                "Saved buoy is not currently active nearby. Choose another source.",
+              );
+            return marine(station, force);
+          }
+          let fallback: Cached<MarineObservation> | undefined;
+          for (const station of options.slice(0, 8)) {
+            try {
+              const result = await marine(station, force);
+              if (result.data.waveFeet !== null) {
+                fallback ||= result;
+                if (Date.now() - result.data.time < 6 * 3600000) return result;
+              }
+            } catch {
+              /* try next actual reporting station */
+            }
+          }
+          if (fallback) return { ...fallback, stale: true };
+          throw new Error(
+            "No recent wave-reporting buoy found among the eight nearest stations within 400 km. Choose a buoy below.",
+          );
+        }, setOcean),
+      );
+      await Promise.all(tasks);
+    };
+    const schedule = foregroundRefresh(
+      load,
+      () => setNow(Date.now()),
+      setOnline,
+    );
+    refreshNow.current = schedule.refresh;
     return () => {
       alive = false;
+      schedule.dispose();
     };
   }, [
     location.id,
@@ -160,7 +170,6 @@ export default function App() {
     location.lon,
     location.tideId,
     location.buoyId,
-    refresh,
   ]);
   function save(next: CoastalLocation[]) {
     setLocations(next);
@@ -250,7 +259,7 @@ export default function App() {
           aria-label="Refresh conditions"
           onClick={() => {
             setNow(Date.now());
-            setRefresh((r) => r + 1);
+            refreshNow.current();
           }}
         >
           ↻

@@ -1,10 +1,13 @@
 import type { MarineObservation, Station } from "../models";
-import { cached, DAY } from "./cache";
+import { cached, DAY, requireForeground } from "./cache";
 import { feet, fahrenheit, knots, numeric } from "../utils";
 const proxy = import.meta.env.VITE_NDBC_PROXY_URL?.replace(/\/$/, "");
 async function text(path: string) {
   if (!proxy)
-    throw new Error("Ocean observations are not connected yet. Weather and tides are still available.");
+    throw new Error(
+      "Ocean observations are not connected yet. Weather and tides are still available.",
+    );
+  requireForeground();
   const r = await fetch(`${proxy}/${path}`, {
     signal: AbortSignal.timeout(18000),
   });

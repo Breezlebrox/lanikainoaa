@@ -25,6 +25,7 @@ export async function cached<T>(
   if (old && !force && Date.now() - old.fetchedAt < ttl)
     return { ...old, stale: false };
   try {
+    requireForeground();
     const result = {
       data: await loader(),
       fetchedAt: Date.now(),
@@ -37,7 +38,17 @@ export async function cached<T>(
     throw e;
   }
 }
+export function requireForeground() {
+  if (
+    (typeof document !== "undefined" &&
+      document.visibilityState !== "visible") ||
+    (typeof navigator !== "undefined" && navigator.onLine === false)
+  ) {
+    throw new Error("Offline or app is not visible");
+  }
+}
 export async function json<T>(url: string): Promise<T> {
+  requireForeground();
   const r = await fetch(url, {
     headers: { Accept: "application/geo+json, application/json" },
     signal: AbortSignal.timeout(18000),

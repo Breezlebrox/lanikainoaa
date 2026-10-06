@@ -53,3 +53,7 @@ Unit tests use small fixtures from real NOAA/NWS response structures. Coverage i
 The deployed proxy was verified against live NDBC station XML and Mokapu Point observations on October 6, 2026. A physical iPhone installation still requires device verification. Location permission and NOAA outages can produce partial data; the remaining sections stay usable. This utility is not a navigation or safety forecast.
 
 Official references: [CO-OPS](https://api.tidesandcurrents.noaa.gov/api/prod/), [metadata](https://api.tidesandcurrents.noaa.gov/mdapi/prod/), [NWS](https://www.weather.gov/documentation/services-web-api), [NDBC](https://www.ndbc.noaa.gov/faq/rt_data_access.shtml).
+
+## Foreground refresh
+
+While visible, the app checks once per minute and reuses each source’s cache until its TTL expires. Returning to the app (including page-cache restoration) or regaining connectivity triggers an immediate cache-aware check. The refresh button bypasses data TTLs for that request only. Existing readings remain visible during updates. Overlapping checks are coalesced. Hiding the app removes the timer; no background polling or Background Sync is registered. Requests already in flight may finish, but subsequent network requests are blocked while hidden. Offline timer ticks update the displayed time without fetching.
